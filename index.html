@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapLibre with GeoJSON</title>
+    <!-- MapLibre CSS -->
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <!-- MapLibre JS -->
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+
+    <!-- GeoJSONデータをJavaScriptとして読み込み -->
+    <script src="data.js"></script>
+
+    <script>
+        // MapLibre初期化
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: {
+                'version': 8,
+                'sources': {
+                    'osm-tiles': {
+                        'type': 'raster',
+                        'tiles': ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                        'tileSize': 256,
+                        'attribution': '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }
+                },
+                'layers': [{
+                    'id': 'osm-tiles',
+                    'type': 'raster',
+                    'source': 'osm-tiles',
+                    'minzoom': 0,
+                    'maxzoom': 19
+                }]
+            },
+            center: [139.6917, 35.6895], // 東京の中心座標
+            zoom: 10
+        });
+
+        // 地図読み込み後にGeoJSONを追加
+        map.on('load', () => {
+            // data.jsで定義したgeojsonData変数を使う
+            map.addSource('geojson-data', {
+                type: 'geojson',
+                data: geojsonData // data.jsで定義された変数
+            });
+
+            // レイヤー追加（ポイントとして表示）
+            map.addLayer({
+                id: 'geojson-layer',
+                type: 'circle',
+                source: 'geojson-data',
+                paint: {
+                    'circle-radius': 5,
+                    'circle-color': '#FF0000'
+                }
+            });
+
+            // ナビゲーションコントロール追加
+            map.addControl(new maplibregl.NavigationControl());
+        });
+    </script>
+</body>
+</html>
+
+
+
